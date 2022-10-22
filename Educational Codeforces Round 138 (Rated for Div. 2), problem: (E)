@@ -1,0 +1,181 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define int long long
+#define mod 998244353
+
+
+
+/*
+1
+6 3
+.#.
+...
+...
+#..
+...
+#.#
+*/
+
+int32_t main()
+{
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+
+    int t;
+    cin>>t;
+    while(t--)
+        {
+            int n,m;
+            cin>>n>>m;
+            string s[n];
+            for(int i=0;i<n;i++){cin>>s[i];}
+
+            int dx[4]={-1,0,0,1};
+            int dy[4]={0,-1,1,0};
+
+            int a[n][m];
+            memset(a,0,sizeof(a));
+            for(int i=0;i<n;i++)
+                {
+                    for(int j=0;j<m;j++)
+                        {
+                            a[i][j]=(s[i][j]=='#');
+                        }
+                }
+
+            int w[n][m];
+            for(int i=0;i<n;i++)
+                {
+                    for(int j=0;j<m;j++)
+                        {
+                            int poss=1;
+                            for(int k=0;k<4;k++)
+                            {
+                            if(i+dx[k]>=0 && i+dx[k]<n && j+dy[k]>=0 && j+dy[k]<m && a[i+dx[k]][j+dy[k]])
+                                {
+                                    poss=0;
+                                    break;
+                                }
+                            }
+
+                            if(poss==0){w[i][j]=1e12;continue;}
+                            if(a[i][j]){w[i][j]=0;}
+                            else{w[i][j]=1;}
+                        }
+                }
+            /*for(int i=0;i<n;i++)
+                {
+                    for(int j=0;j<m;j++)
+                        {
+                            cout<<w[i][j]<<" ";
+                        }
+                    cout<<"\n";
+                }*/
+            vector<tuple<int,int,int>> adj[n][m];
+
+            int sdx[4]={-1,-1,1,1};
+            int sdy[4]={-1,1,-1,1};
+            for(int i=0;i<n;i++)
+                {
+                    for(int j=0;j<m;j++)
+                        {
+                            for(int k=0;k<4;k++)
+                                {
+                                    int a=i+sdx[k];
+                                    int b=j+sdy[k];
+                                    if(a>=0 && a<n && b>=0 && b<m)
+                                        {
+                                            adj[i][j].push_back({a,b,w[a][b]+w[i][j]});
+                                        }
+                                }
+                        }
+                }
+            /*for(auto x:adj[1][0])
+                {
+                    cout<<(get<0>)(x)<<" "<<(get<1>)(x)<<" "<<(get<2>)(x)<<"P\n";
+                }*/
+
+            set<tuple<int,int,int>> sf;
+            int d[n][m];
+            pair<int,int> par[n][m];
+            int visited[n][m];
+            memset(visited,0,sizeof(visited));
+            for(int i=0;i<n;i++)
+                {
+                    for(int j=0;j<m;j++)
+                        {
+                            d[i][j]=1e12;
+                        }
+                    d[i][0]=(s[i][0]=='.');
+                    par[i][0]={-1,-1};
+                }
+
+
+
+            for(int i=0;i<n;i++)
+                {
+                    for(int j=0;j<m;j++)
+                        {
+                            sf.insert({d[i][j],i,j});
+                        }
+                }
+
+            while(!sf.empty())
+                {
+                    auto f=*(sf.begin());
+                    int w=(get<0>)(f);
+                    int x=(get<1>)(f);
+                    int y=(get<2>)(f);
+                    visited[x][y]=1;
+                    sf.erase(sf.begin());
+                    for(auto pp:adj[x][y])
+                        {
+                            int i=(get<0>)(pp);
+                            int j=(get<1>)(pp);
+                            int w2=(get<2>)(pp);
+                            if(visited[i][j]){continue;}
+                            sf.erase(sf.find({d[i][j],i,j}));
+                            //cout<<w<<" "<<w2<<" "<<i<<" "<<j<<" "<<x<<" "<<y<<" "<<d[i][j]<<"L\n";
+                            if(d[i][j]>w+w2){d[i][j]=w+w2;par[i][j]={x,y};}
+                            //cout<<d[i][j]
+                            sf.insert({d[i][j],i,j});
+                        }
+                }
+            /*for(int i=0;i<n;i++)
+                {
+                    for(int j=0;j<m;j++)
+                        {
+                            cout<<d[i][j]<<" ";
+                        }
+                    cout<<"\n";
+                }*/
+            int curry=m-1;
+            int ans=1e12;
+            int currx=0;
+            for(int i=0;i<n;i++)
+                {
+                    if(d[i][m-1]<ans){ans=d[i][m-1];currx=i;}
+                }
+            if(ans>=1e8){cout<<"NO\n";continue;}
+
+            while(1)
+                {
+                    a[currx][curry]=1;
+                    auto f=par[currx][curry];
+                    if(f.first==-1){break;}
+                    currx=f.first;
+                    curry=f.second;
+                }
+            cout<<"YES\n";
+            for(int i=0;i<n;i++)
+                {
+                    for(int j=0;j<m;j++)
+                        {
+                            if(a[i][j]){cout<<"#";}
+                            else{cout<<".";}
+                        }
+                    cout<<"\n";
+                }
+
+        }
+}
